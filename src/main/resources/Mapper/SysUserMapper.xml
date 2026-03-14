@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.zx.mapper.SysUserMapper">
+
+    <select id="queryCategory" resultType="com.example.zx.entity.Category">
+        select
+            *
+        from
+            category
+        <where>
+            <if test="categoryDTO != null and categoryDTO.id != null">
+                id = #{categoryDTO.id}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryBill" resultType="com.example.zx.entity.Bill">
+        select * from bill order by bill_date desc
+    </select>
+
+    <select id="queryBillDetail" resultType="com.example.zx.entity.BillDetail">
+        select
+            *
+        from
+            bill_detail
+        <where>
+            <if test = "billId != null and billId != ''">
+                bill_id = #{billId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="saveBill" parameterType="com.example.zx.dto.BillDTO" useGeneratedKeys="true" keyProperty="id">
+         INSERT INTO bill (
+             title,
+             description,
+             bill_date,
+             create_by
+         ) VALUES (
+             #{title},
+             #{description},
+             #{billDate},
+             #{createBy}
+         )
+    </insert>
+
+    <insert id="insertMonthStat">
+        INSERT INTO bill_stat_month (
+            stat_month, create_by, total_amount, detail_count, max_amount
+        )
+        SELECT
+            DATE_FORMAT(consume_time, '%Y-%m-01') AS stat_month,
+            create_by,
+            IFNULL(SUM(amount), 0),
+            COUNT(*),
+            IFNULL(MAX(amount), 0)
+        FROM bill_detail
+        WHERE is_counted = 1
+          AND create_by = #{createBy}
+          AND consume_time &gt;= #{startDate}
+          AND consume_time &lt; #{endDate}
+        GROUP BY stat_month, create_by
+            ON DUPLICATE KEY UPDATE
+                                 total_amount     = VALUES(total_amount),
+                                 detail_count     = VALUES(detail_count),
+                                 max_amount       = VALUES(max_amount)
+    </insert>
+
+
+    <insert id="insertMonthStat1">
+        INSERT INTO bill_stat_month (
+            stat_month, create_by, total_amount, detail_count, max_amount
+        )
+        SELECT
+            DATE_FORMAT(consume_time, '%Y-%m-01') AS stat_month,
+            create_by,
+            IFNULL(SUM(amount), 0),
+            COUNT(*),
+            IFNULL(MAX(amount), 0),
+        FROM bill_detail
+        WHERE is_counted = 1
+        <choose>
+            <when test="startDate != null and endDate != null">
+                AND consume_time &gt;= #{startDate}
+                AND consume_time &lt; #{endDate}
+            </when>
+            <otherwise>
+                AND consume_time &gt;= DATE_FORMAT(CURDATE(), '%Y-%m-01')
+                AND consume_time &lt; DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01')
+            </otherwise>
+        </choose>
+        GROUP BY stat_month, create_by
+        ON DUPLICATE KEY UPDATE
+        total_amount     = VALUES(total_amount),
+        detail_count     = VALUES(detail_count),
+        max_amount       = VALUES(max_amount)
+    </insert>
+
+
+</mapper>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.zx.mapper.BillDetailMapper">
+
+    <select id="sumAmountByRange" resultType="java.math.BigDecimal">
+        SELECT IFNULL(SUM(amount), 0)
+        FROM bill_detail
+        WHERE consume_time &gt;= #{startTime}
+        AND consume_time &lt; #{endTime}
+    </select>
+</mapper>
