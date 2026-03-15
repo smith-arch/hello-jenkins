@@ -1,0 +1,59 @@
+# application.yml
+server:
+  port: 8888
+
+spring:
+  application:
+    name: shiro-jwt-demo
+
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/expense_tracking?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
+    username: root
+    password: root
+
+  # Redis配置（可选，用于JWT黑名单）
+  redis:
+    host: localhost
+    port: 6379
+    #    password: root
+    database: 0
+    timeout: 3000
+    lettuce:
+      pool:
+        max-active: 20
+        max-idle: 10
+        min-idle: 0
+        max-wait: -1
+
+# MyBatis Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml  # XML文件扫描路径
+  type-aliases-package: com.example.zx.entity    # 实体类包扫描
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# JWT配置
+jwt:
+  secret: myJwtSecret123456
+  expiration: 86400  # 24小时，单位秒
+
+# Shiro配置
+#shiro:
+#  enabled: true
+#  web:
+#    enabled: true
+
+# 日志配置
+logging:
+  level:
+    com.example: debug
+    org.apache.shiro: debug
+
